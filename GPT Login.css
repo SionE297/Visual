@@ -1,0 +1,80 @@
+/* Reset some default styles */
+body, h1, form, label, input {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Full viewport height for body */
+html, body {
+    height: 100%;
+    font-family: 'Arial Black', Gadget, sans-serif; /* Bold font for strong terminal look */
+    background-color: #000; /* Black background */
+    color: rgb(255, 0, 0); /* Red text color */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Style for the terminal container */
+.terminal-container {
+    width: 100%;
+    max-width: 700px; /* Increased width */
+    min-width: 300px;
+    min-width: none;
+    padding: 30px; /* Increased padding */
+    border: 2px solid rgb(255, 0, 0); /* Thicker red border */
+    border-radius: 8px; /* Slightly more rounded corners */
+    background-color: #111; /* Slightly lighter black background for the form */
+}
+
+h1 {
+    font-size: 30px; /* Larger heading font size */
+    margin-bottom: 30px; /* Increased margin */
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    margin-bottom: 10px; /* Increased margin */
+    font-size: 18px; /* Larger font size */
+    color: rgb(255, 0, 0); /* Red text color */
+}
+
+input {
+    padding: 15px; /* Increased padding */
+    font-size: 16px; /* Larger font size */
+    margin-bottom: 20px; /* Increased margin */
+    border: 2px solid rgb(255, 0, 0); /* Thicker red border */
+    border-radius: 5px; /* Slightly more rounded corners */
+    background-color: #000; /* Black background */
+    color: rgb(255, 0, 0); /* Red text color */
+}
+
+input[type="text"], input[type="password"] {
+    width: 100%;
+}
+
+input:focus {
+    outline: none;
+    border-color: rgb(255, 0, 0); /* Red border on focus */
+    background-color: #111; /* Slightly lighter background on focus */
+}
+
+input[type="submit"] {
+    background-color: rgb(255, 0, 0); /* Red background */
+    color: #000; /* Black text color */
+    border: none;
+    padding: 15px; /* Increased padding */
+    border-radius: 5px; /* Slightly more rounded corners */
+    cursor: pointer;
+    font-size: 18px; /* Larger font size */
+    font-weight: bold;
+}
+
+input[type="submit"]:hover {
+    background-color: rgb(221, 0, 0); /* Slightly darker red on hover */
+}

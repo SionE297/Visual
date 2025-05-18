@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terminal Login</title>
+    <link rel="stylesheet" href="GPT Login.css">
+</head>
+<body>
+    <div class="terminal-container">
+        <h1>Login</h1>
+        <form action="#" method="post">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
+            
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+        </form>
+    </div>
+</body>
+<script>
+    document.getElementById('password').addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+            this.form.submit();
+        }
+    });
+</script>
+
+</html>
