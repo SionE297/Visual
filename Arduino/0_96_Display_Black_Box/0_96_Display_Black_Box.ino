@@ -11,6 +11,7 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 #define PIN_CLK 3  // Connect to DT
 #define PIN_SW  4  // Connect to SW (button)
 #define SIDE_SW 12
+#define RED_LED_PIN 6
 // Create a RotaryEncoder instance
 Encoder encoder(PIN_CLK, PIN_DT);
 #define NUMBER_of_OPTIONS 8 //Number of items in list
@@ -35,9 +36,11 @@ void setup() {
   display.println(0);
   display.setCursor(78, 22);
   display.println(0);
-  
+
+  setVeryDim();
+
   bool lockScreen=true;
-  //Lock_Screen();
+  //Lock_Screen();    //skip this for now
 } //setup end
 
 const unsigned char battery4[] PROGMEM = { 
@@ -95,6 +98,37 @@ const unsigned char battery4[] PROGMEM = {
 	0x70, 0xf0, 0x0f, 0x0e, 0x78, 0xf0, 0x0f, 0x1e, 0x78, 0x70, 0x0e, 0x1e, 0x3c, 0x00, 0x00, 0x3c, 
 	0x3e, 0x00, 0x00, 0x7c, 0x1e, 0x00, 0x00, 0x78, 0x0e, 0x00, 0x00, 0x70, 0x06, 0x00, 0x00, 0x60
 };
+/*class led {
+  private:
+    int pin;
+    unsigned long interval, duration, startTime, lastToggle;
+    bool running, state;
+
+  public:
+    led(int p) : pin(p), running(false), state(LOW) {
+      pinMode(pin, OUTPUT);
+      digitalWrite(pin, LOW);
+    }
+
+    // kick off a blink cycle
+    void blink(unsigned long blinkInterval, unsigned long totalDuration) {
+      interval   = blinkInterval;
+      duration   = totalDuration;
+      startTime  = lastToggle = millis();
+      state      = LOW;
+      running    = true;
+      digitalWrite(pin, state);
+    }
+
+    void light(int lightDuration) {
+      static int lightDurationGlobal = lightDuration;
+      int now = millis();
+      digitalWrite(pin, HIGH);
+      
+    }//light
+};//class
+
+led redLED(RED_LED_PIN);*/
 
 bool EncoderSW=false;
 bool SideSW=false;
@@ -130,7 +164,7 @@ void battery_scroll() {
 long newPosition = 0;
 long lastPosition = -999;
 long encoderOffset = 0;
-String Options[] = {"Remote", "IR-Reader", "Radio", "Game", "Empty", "Lock Screen", "Counter", "Settings"};
+String Options[] = {"Remote", "IR-Reader", "Radio", "Timer", "Empty", "Lock Screen", "Counter", "Settings"};
 String currentSelected = Options[0];   //0 to start at settings
 bool isHome = true;
 long taskNum;
@@ -167,6 +201,15 @@ void setZero() {
   newPosition = 0;
 
 };
+void setVeryDim() {
+  // 1) Contrast register — leave at a non‑zero value so text is still visible
+  display.ssd1306_command(SSD1306_SETCONTRAST);  // 0x81
+  display.ssd1306_command(0x02);                 // 0x01 was ok; 0x02 keeps a little headroom
+
+  // 2) Pre‑charge period — command 0xD9
+  display.ssd1306_command(0xD9);
+  display.ssd1306_command(0x11);  // Phase 1 = 1 DCLK, Phase 2 = 1 DCLK  (0xXY: X=phase2, Y=phase1)
+}
 void debounce(bool * whichButton) {
   while (true) {
     buttons();
@@ -219,6 +262,7 @@ void password() {
   int thirdNum=0;
   selectedDigit=0;
   while (lockScreen) {
+    
     buttons();
     newPosition = (encoder.read() / 2) - encoderOffset;
     lastPosition = newPosition;
@@ -264,7 +308,6 @@ void password() {
     setZero();
     isHome=true;
     updateMenu(newPosition % NUMBER_of_OPTIONS);
-    //updateDisplayNumber(0);
     break;
     }
   }   //lockScreen loop end
@@ -282,7 +325,7 @@ void Task() {
     Radio();}
   else if (taskNum==3 && EncoderSW==true && isHome) {
     isHome=false;
-    Game();}
+    Timer();}
   else if (taskNum==4 && EncoderSW==true && isHome) {
     isHome=false;
     Empty();}
@@ -303,8 +346,39 @@ void Radio() {
   display.setCursor(0, 0);
   display.println(F("Radio"));
 };
+int brightnessLevel=0;
 void Settings() {
-  Empty();
+  setZero();
+  brightnessLevel=0;
+  display.ssd1306_command(SSD1306_SETCONTRAST);
+  display.ssd1306_command(1);
+  display.clearDisplay();
+  display.setTextSize(2);
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(0, 16);
+  display.println(brightnessLevel);
+  display.display();
+  
+  while (true) {
+    rotary_encoder();
+
+    if (brightnessLevel != newPosition && (newPosition>=1 && newPosition<=25) ) {
+      brightnessLevel = newPosition * 10;
+      display.ssd1306_command(SSD1306_SETCONTRAST);
+      display.ssd1306_command(brightnessLevel);
+    
+      //percentage Bar
+      display.clearDisplay();
+      display.setTextSize(2);
+      display.setTextColor(SSD1306_WHITE);
+      display.setCursor(0, 16);
+      display.println(brightnessLevel);
+      display.display();
+    }
+    if (SideSW) {break;}
+  }//while
+  setZero();
+  updateMenu(newPosition % NUMBER_of_OPTIONS);
 };
 void Remote() {
   setZero();
@@ -312,6 +386,7 @@ void Remote() {
   display.clearDisplay();
   
   while (true) {
+    //redLED.update();
     rotary_encoder(); //buttons(); inside
     display.setTextSize(1);
     display.setTextColor(SSD1306_WHITE);
@@ -414,23 +489,23 @@ void Remote() {
     }//switch
     
     if (EncoderSW) {
-      switch (newPosition) 
-      {
+      switch (newPosition) {
         case 0:
             display.clearDisplay();
             display.drawBitmap(48, 20, signal, 32, 24, SSD1306_WHITE);
             display.display();
+            //redLED.blink(10, 500);
             delay(1000);
             //play signal
             break;
         case 1:
-
+            //redLED.blink(50, 1000);
             break;
         case 2:
-
+            //redLED.light(500);
             break;
         case 3:
-
+            //redLED.blink(100, 10000);
             break;
         default:
 
@@ -443,8 +518,94 @@ void Remote() {
 void IRreader() {
   Empty();
 };
-void Game() {
-  Empty();
+//int global_mins=12;
+void countdown(int mins/*=global_mins*/) {
+  int secs=1; //leave 1 so that its displeys 00:00
+  delay(200);
+  display.clearDisplay();
+  while (true) {
+    buttons();
+    delay(976);
+    display.fillRect(33, 22, 91, 14, SSD1306_BLACK);
+    display.setTextSize(2);
+    display.setTextColor(SSD1306_WHITE);
+    display.setCursor(57, 22);
+    display.print(F(":"));
+    secs --;
+    buttons();
+
+    if (secs < 0) {
+      mins--;
+      secs=59;
+      }
+    if (mins < 0) {
+      mins=0;
+      secs=0;
+    }
+    if (mins<10) {
+      display.setCursor(45, 22);
+      display.print(mins);
+      display.setCursor(33, 22);
+      display.print(("0"));
+    }
+    else {
+      display.setCursor(33, 22);
+      display.print(mins);
+    }
+
+    if (secs<10) {
+      display.setCursor(81, 22);
+      display.print(secs);
+      display.setCursor(69, 22);
+      display.print(("0"));
+    }
+    else {
+      display.setCursor(69, 22);
+      display.print(secs);
+    }
+
+    display.display();
+  }//while
+
+  /*while (mins&&secs !=0) {//   when timer reaches 0
+    buttons();
+    if (EncoderSW) {break;}
+  }//while 2       */
+};
+void Timer() {
+  setZero();
+  debounce(&EncoderSW);
+  delay(400);
+  display.clearDisplay();
+  while(true) {
+    rotary_encoder();
+    unsigned int setTime = newPosition;
+    if (setTime > 99) {setTime=99;}
+    display.clearDisplay();
+    display.setTextSize(1);
+    display.setTextColor(SSD1306_WHITE);
+    display.setCursor(0, 0);
+    display.print(F("Timer Delay: "));
+    display.print(setTime);
+    display.display();
+
+    if (SideSW) {
+      isHome=true;
+      setZero();
+      debounce(&EncoderSW);
+      display.clearDisplay();
+      break;
+    }
+    
+    if (EncoderSW) {
+      countdown(setTime);
+      display.clearDisplay();
+      break;}//if
+  }//while
+  isHome=true;
+  setZero();
+  debounce(&EncoderSW);
+  delay(400);
 };
 void Empty() {
   setZero();
@@ -463,7 +624,7 @@ void Counter() {
   isHome=false;
   display.clearDisplay();
   display.display();
-  delay(400);
+  debounce(&EncoderSW);
   while (true) {
     buttons();
     if (EncoderSW) {
@@ -480,7 +641,7 @@ void Counter() {
       display.setCursor(100, 0);
       display.println(count);
       display.display();
-      delay(800);
+      debounce(&SideSW);
     }
   }
   display.clearDisplay();
@@ -492,22 +653,18 @@ void Lock_Screen() {
   setZero();
   lockScreen=true;
   delay(500);
-  display.clearDisplay();
-  display.setTextSize(2);
-  display.setTextColor(SSD1306_WHITE);
-  display.setCursor(33, 22);
-  display.println("00:00");
-  display.display();
   
   while (lockScreen) {
     buttons();
+    //countdown();
     if (EncoderSW) {
-      delay(500);
+      delay(0);
       setZero();
       password();
     }
   }//while loop
 };
+
 
 void loop() {
   //Lock_Screen(); in setup
