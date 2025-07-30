@@ -96,7 +96,13 @@ const unsigned char battery4[] PROGMEM = {
 	0xf1, 0xe0, 0x07, 0x8f, 0xf1, 0xc0, 0x03, 0x8f, 0xe1, 0xc3, 0xc3, 0x87, 0xe3, 0xc3, 0xc3, 0xc7, 
 	0xe3, 0xc3, 0xc3, 0xc7, 0xe1, 0xc3, 0xc3, 0x87, 0xf1, 0xc0, 0x03, 0x8f, 0xf1, 0xe0, 0x07, 0x8f, 
 	0x70, 0xf0, 0x0f, 0x0e, 0x78, 0xf0, 0x0f, 0x1e, 0x78, 0x70, 0x0e, 0x1e, 0x3c, 0x00, 0x00, 0x3c, 
-	0x3e, 0x00, 0x00, 0x7c, 0x1e, 0x00, 0x00, 0x78, 0x0e, 0x00, 0x00, 0x70, 0x06, 0x00, 0x00, 0x60
+	0x3e, 0x00, 0x00, 0x7c, 0x1e, 0x00, 0x00, 0x78, 0x0e, 0x00, 0x00, 0x70, 0x06, 0x00, 0x00, 0x60};
+  const unsigned char checkbox_selected [] PROGMEM = {
+	// 'image_2025-07-30_123800026, 7x7px
+	0xfe, 0x82, 0xba, 0xba, 0xba, 0x82, 0xfe};
+  const unsigned char checkbox_unselected [] PROGMEM = {
+	// 'image_2025-07-30_124254327, 7x7px
+	0xfe, 0x82, 0x82, 0x82, 0x82, 0x82, 0xfe
 };
 /*class led {
   private:
@@ -153,7 +159,7 @@ void battery_scroll() {
     lastUpdate = millis();
     }
   };
-/*void updateDisplayNumber(long value) {
+/*void updateDisplayNumber(int value) {
   display.fillRect(0, 0, 30, 15, BLACK);
   display.setTextSize(1);
   display.setTextColor(SSD1306_WHITE);
@@ -161,13 +167,13 @@ void battery_scroll() {
   display.println(value);
   display.display();
   }*/
-long newPosition = 0;
-long lastPosition = -999;
-long encoderOffset = 0;
-String Options[] = {"Remote", "IR-Reader", "Radio", "Timer", "Empty", "Lock Screen", "Counter", "Settings"};
+int newPosition = 0;
+int lastPosition = -999;
+int encoderOffset = 0;
+const String Options[] = {"Remote", "IR-Reader", "Radio", "Timer", "Empty", "Lock Screen", "Counter", "Settings"};
 String currentSelected = Options[0];   //0 to start at settings
 bool isHome = true;
-long taskNum;
+int taskNum;
 void rotary_encoder() {
   newPosition = (encoder.read() / 2) - encoderOffset; // Adjust "/2" based on your encoder's resolution
   
@@ -391,7 +397,7 @@ void Remote() {
     display.setTextSize(1);
     display.setTextColor(SSD1306_WHITE);
     display.setCursor(4, 0);
-    display.println("IR-Remote");
+    display.println(F("IR-Remote"));
     if (SideSW) {break;}
     switch (newPosition) {
       case 0:
@@ -403,14 +409,14 @@ void Remote() {
           display.setTextSize(1);
           display.setTextColor(SSD1306_BLACK);
           display.setCursor(14, 20);
-          display.println("S-Base");
+          display.println(F("S-Base"));
           display.setTextColor(SSD1306_WHITE);
           display.setCursor(79, 20);
-          display.println("Garage");
+          display.println(F("Garage"));
           display.setCursor(13, 46);
-          display.println("Door-3");
+          display.println(F("Door-3"));
           display.setCursor(82, 46);
-          display.println("R2-D2");
+          display.println(F("R2-D2"));
           break;
       case 1:
           display.fillRect(0, 16, 128, 48, SSD1306_BLACK);
@@ -421,15 +427,15 @@ void Remote() {
           display.setTextSize(1);
           display.setTextColor(SSD1306_WHITE);
           display.setCursor(14, 20);
-          display.println("S-Base");
+          display.println(F("S-Base"));
           display.setTextColor(SSD1306_BLACK);
           display.setCursor(79, 20);
-          display.println("Garage");
+          display.println(F("Garage"));
           display.setTextColor(SSD1306_WHITE);
           display.setCursor(13, 46);
-          display.println("Door-3");
+          display.println(F("Door-3"));
           display.setCursor(82, 46);
-          display.println("R2-D2");
+          display.println(F("R2-D2"));
           break;
       case 2:
           display.fillRect(0, 16, 128, 48, SSD1306_BLACK);
@@ -440,15 +446,15 @@ void Remote() {
           display.setTextSize(1);
           display.setTextColor(SSD1306_WHITE);
           display.setCursor(14, 20);
-          display.println("S-Base");
+          display.println(F("S-Base"));
           display.setCursor(79, 20);
-          display.println("Garage");
+          display.println(F("Garage"));
           display.setTextColor(SSD1306_BLACK);
           display.setCursor(13, 46);
-          display.println("Door-3");
+          display.println(F("Door-3"));
           display.setTextColor(SSD1306_WHITE);
           display.setCursor(82, 46);
-          display.println("R2-D2");
+          display.println(F("R2-D2"));
           break;
       case 3:
           display.fillRect(0, 16, 128, 48, SSD1306_BLACK);
@@ -459,14 +465,14 @@ void Remote() {
           display.setTextSize(1);
           display.setTextColor(SSD1306_WHITE);
           display.setCursor(14, 20);
-          display.println("S-Base");
+          display.println(F("S-Base"));
           display.setCursor(79, 20);
-          display.println("Garage");
+          display.println(F("Garage"));
           display.setCursor(13, 46);
-          display.println("Door-3");
+          display.println(F("Door-3"));
           display.setTextColor(SSD1306_BLACK);
           display.setCursor(82, 46);
-          display.println("R2-D2");
+          display.println(F("R2-D2"));
           break;
       default:
           display.fillRect(0, 16, 128, 48, SSD1306_BLACK);
@@ -477,14 +483,14 @@ void Remote() {
           display.setTextSize(1);
           display.setTextColor(SSD1306_WHITE);
           display.setCursor(14, 20);
-          display.println("S-Base");
+          display.println(F("S-Base"));
           display.setCursor(79, 20);
-          display.println("Garage");
+          display.println(F("Garage"));
           display.setCursor(13, 46);
-          display.println("Door-3");
+          display.println(F("Door-3"));
           display.setTextColor(SSD1306_BLACK);
           display.setCursor(82, 46);
-          display.println("R2-D2");
+          display.println(F("R2-D2"));
         break;
     }//switch
     
@@ -565,13 +571,22 @@ void countdown(int mins/*=global_mins*/) {
     }
 
     display.display();
-  }//while
 
-  /*while (mins&&secs !=0) {//   when timer reaches 0
-    buttons();
-    if (EncoderSW) {break;}
-  }//while 2       */
+    if (mins==0 && secs==0) {
+      delay(100);
+      buttons();
+      if (EncoderSW) {
+        if (lockScreen==true) {
+          password();
+          }
+        break;
+      }  
+        
+    }  //if (mins==0 && secs==0)
+  }//while
 };
+unsigned int setTime = newPosition;
+bool OptionsInfo[4] {false, false, false, false};
 void Timer() {
   setZero();
   debounce(&EncoderSW);
@@ -579,7 +594,7 @@ void Timer() {
   display.clearDisplay();
   while(true) {
     rotary_encoder();
-    unsigned int setTime = newPosition;
+    setTime = newPosition;
     if (setTime > 99) {setTime=99;}
     display.clearDisplay();
     display.setTextSize(1);
@@ -596,12 +611,97 @@ void Timer() {
       display.clearDisplay();
       break;
     }
-    
     if (EncoderSW) {
+      debounce(&EncoderSW);
+      break;
+    }
+  } //while 1
+
+  setZero();
+  int TimerOption=0;
+  int TimerEncoder=0;
+
+  display.drawBitmap(2, 16, checkbox_unselected, 7, 7, SSD1306_WHITE);
+  display.drawBitmap(2, 28, checkbox_unselected, 7, 7, SSD1306_WHITE);
+  display.drawBitmap(2, 40, checkbox_unselected, 7, 7, SSD1306_WHITE);
+  display.drawBitmap(2, 52, checkbox_unselected, 7, 7, SSD1306_WHITE);
+
+  while (isHome==false) {
+    rotary_encoder();
+    display.setTextSize(1);
+    display.setTextColor(SSD1306_WHITE);
+    display.setCursor(19, 16);
+    display.println(F("Lock Screen"));
+    display.setCursor(19, 28);
+    display.println(F("Lock Buttons"));
+    display.setCursor(19, 40);
+    display.println(F("Allow Pause"));
+    display.setCursor(19, 52);
+    display.println(F("Start!!!"));  //Press SideSW to pause, EncoderSW to play
+    
+    if (newPosition > TimerEncoder) {
+      TimerOption ++;
+      if (TimerOption > 3) {
+        TimerOption=3;
+        }
+      TimerEncoder = newPosition;
+      }
+    else if (newPosition < TimerEncoder) {
+      TimerOption --;
+      if (TimerOption < 0) {
+      TimerOption=0;
+      }
+      TimerEncoder = newPosition;}
+    
+    // Clear old lines
+    display.drawFastVLine(0, 16, 46, SSD1306_BLACK);
+    display.drawFastVLine(10, 16, 46, SSD1306_BLACK);
+    // Draw new arrow at TimerOption
+    int y = 16 + TimerOption * 12;
+    display.drawFastVLine(0, y, 7, SSD1306_WHITE);
+    display.drawFastVLine(10, y, 7, SSD1306_WHITE);
+
+    if (EncoderSW) {
+      OptionsInfo[TimerOption] = !OptionsInfo[TimerOption];
+      // Clear old lines
+      display.fillRect(2, y, 7, 7, SSD1306_BLACK);
+      // Draw new arrow at TimerOption
+      if (OptionsInfo[TimerOption] == true) {
+        display.drawBitmap(2, y, checkbox_selected, 7, 7, SSD1306_WHITE);
+      }
+      else if (OptionsInfo[TimerOption] == false) {
+        display.fillRect(2, y, 7, 7, SSD1306_BLACK);
+        display.drawBitmap(2, y, checkbox_unselected, 7, 7, SSD1306_WHITE);
+      }
+      debounce(&EncoderSW);
+    }
+    display.display();
+
+    if (SideSW) {
+      isHome=true;
+      setZero();
+      debounce(&EncoderSW);
+      display.clearDisplay();
+      break;
+    }
+
+    if (OptionsInfo[0]==true) {
+      lockScreen=true;
+    }
+    else { lockScreen=false;
+    }
+    if (OptionsInfo[1]==true) {
+    }
+    if (OptionsInfo[2]==true) {
+    }
+    if (OptionsInfo[3]==true) {
       countdown(setTime);
       display.clearDisplay();
-      break;}//if
-  }//while
+      break;
+    }
+
+} //while 2
+
   isHome=true;
   setZero();
   debounce(&EncoderSW);
