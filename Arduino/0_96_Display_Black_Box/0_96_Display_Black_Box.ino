@@ -2,6 +2,8 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <Encoder.h>
+#include <EEPROM.h>
+#include "Icons.h"
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 #define OLED_RESET     -1 // Reset pin # (or -1 if sharing Arduino reset pin)
@@ -15,6 +17,7 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 // Create a RotaryEncoder instance
 Encoder encoder(PIN_CLK, PIN_DT);
 #define NUMBER_of_OPTIONS 8 //Number of items in list
+bool lockScreenOnStart = false;
 
 void setup() {
   pinMode(PIN_SW, INPUT_PULLUP); // Button connected with pull-up
@@ -28,158 +31,11 @@ void setup() {
   display.display();
   Serial.begin(9600);
 
-  display.setTextSize(2);
-  display.setTextColor(SSD1306_WHITE);
-  display.setCursor(38, 22);
-  display.println(0);
-  display.setCursor(58, 22);
-  display.println(0);
-  display.setCursor(78, 22);
-  display.println(0);
-
   setVeryDim();
+  loadSettings();
 
-  bool lockScreen=true;
-  //Lock_Screen();    //skip this for now
+  if (lockScreenOnStart==true) {Lock_Screen();}    //skip this for now
 } //setup end
-
-const unsigned char battery4[] PROGMEM = { 
-  0x7f, 0xfc, 0x80, 0x02, 0xb6, 0xdb, 0xb6, 0xdb, 0xb6, 0xdb, 0xb6, 0xdb, 0x80, 0x02, 0x7f, 0xfc};
-  const unsigned char battery3[] PROGMEM = {
-	0x7f, 0xfc, 0x80, 0x02, 0xb6, 0xc3, 0xb6, 0xc3, 0xb6, 0xc3, 0xb6, 0xc3, 0x80, 0x02, 0x7f, 0xfc};
-  const unsigned char battery2[] PROGMEM = {
-	0x7f, 0xfc, 0x80, 0x02, 0xb6, 0x03, 0xb6, 0x03, 0xb6, 0x03, 0xb6, 0x03, 0x80, 0x02, 0x7f, 0xfc, };
-  const unsigned char battery1[] PROGMEM = {
-	0x7f, 0xfc, 0x80, 0x02, 0xb0, 0x03, 0xb0, 0x03, 0xb0, 0x03, 0xb0, 0x03, 0x80, 0x02, 0x7f, 0xfc,};
-  const unsigned char battery0[] PROGMEM = {
-	0x7f, 0xfc, 0x80, 0x02, 0x80, 0x03, 0x80, 0x03, 0x80, 0x03, 0x80, 0x03, 0x80, 0x02, 0x7f, 0xfc};
-  const unsigned char selectBox [] PROGMEM = {
-	// image 111x16px
-	0x3f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xf8, 0x40, 0x00, 
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x80, 0x00, 0x00, 0x00, 
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x06, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x06, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x06, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-	0x00, 0x00, 0x00, 0x06, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-	0x00, 0x06, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x06, 
-	0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x06, 0x80, 0x00, 
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x06, 0x80, 0x00, 0x00, 0x00, 
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x06, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x06, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x06, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-	0x00, 0x00, 0x00, 0x06, 0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
-	0xff, 0xfc, 0x3f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xf8};
-  const unsigned char smallBox [] PROGMEM = {
-	// image_2025-05-30_150722503, 57x16px
-	0x3f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfe, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 
-	0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x80, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x80, 
-	0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x80, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x80, 
-	0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x80, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x80, 
-	0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x80, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x80, 
-	0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x80, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x80, 
-	0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x80, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x80, 
-	0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x3f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfe, 0x00};
-  const unsigned char smallBoxSelect [] PROGMEM = {
-	// image_2025-05-31_133956954, 57x16px
-	0x3f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfe, 0x00, 0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x80, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x80, 
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x80, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x80, 
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x80, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x80, 
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x80, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x80, 
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x80, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x80, 
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x80, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x80, 
-	0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x3f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfe, 0x00};
-  const unsigned char signal [] PROGMEM = {
-	// 'image_2025-05-31_194247242, 32x24px
-	0x06, 0x00, 0x00, 0x60, 0x0e, 0x00, 0x00, 0x70, 0x1e, 0x00, 0x00, 0x78, 0x3e, 0x00, 0x00, 0x7c, 
-	0x3c, 0x00, 0x00, 0x3c, 0x78, 0x70, 0x0e, 0x1e, 0x78, 0xf0, 0x0f, 0x1e, 0x70, 0xf0, 0x0f, 0x0e, 
-	0xf1, 0xe0, 0x07, 0x8f, 0xf1, 0xc0, 0x03, 0x8f, 0xe1, 0xc3, 0xc3, 0x87, 0xe3, 0xc3, 0xc3, 0xc7, 
-	0xe3, 0xc3, 0xc3, 0xc7, 0xe1, 0xc3, 0xc3, 0x87, 0xf1, 0xc0, 0x03, 0x8f, 0xf1, 0xe0, 0x07, 0x8f, 
-	0x70, 0xf0, 0x0f, 0x0e, 0x78, 0xf0, 0x0f, 0x1e, 0x78, 0x70, 0x0e, 0x1e, 0x3c, 0x00, 0x00, 0x3c, 
-	0x3e, 0x00, 0x00, 0x7c, 0x1e, 0x00, 0x00, 0x78, 0x0e, 0x00, 0x00, 0x70, 0x06, 0x00, 0x00, 0x60};
-  const unsigned char checkbox_selected [] PROGMEM = {
-	// 'image_2025-07-30_123800026, 7x7px
-	0xfe, 0x82, 0xba, 0xba, 0xba, 0x82, 0xfe};
-  const unsigned char checkbox_unselected [] PROGMEM = {
-	// 'image_2025-07-30_124254327, 7x7px
-	0xfe, 0x82, 0x82, 0x82, 0x82, 0x82, 0xfe};
-  const unsigned char radio_selected [] PROGMEM = {
-	// 'image_2025-08-16_211215942, 7x7px
-	0x7c, 0x82, 0xba, 0xba, 0xba, 0x82, 0x7c};
-  const unsigned char radio_unselected [] PROGMEM = {
-	// 'image_2025-08-16_211028522, 7x7px
-	0x7c, 0x82, 0x82, 0x82, 0x82, 0x82, 0x7c};
-  const unsigned char selectArrow [] PROGMEM = {
-	// 'image_2025-08-16_200915587, 4x7px
-	0x80, 0x40, 0x20, 0x10, 0x20, 0x40, 0x80};
-  const unsigned char selectArrowBold [] PROGMEM = {
-	// 'image_2025-08-16_202849121, 4x7px
-	0x80, 0xc0, 0x60, 0x30, 0x60, 0xc0, 0x80};
-  const unsigned char pointArrow [] PROGMEM = {
-	// 'image_2025-08-16_211616936, 8x5px
-	0x0c, 0x06, 0xff, 0x06, 0x0c};
-  const unsigned char keyboardUppercase [] PROGMEM = {
-	// 'image_2025-08-27_124757198, 128x37px
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
-	0x80, 0x02, 0x00, 0x80, 0x20, 0x08, 0x02, 0x00, 0x80, 0x20, 0x08, 0x02, 0x00, 0x80, 0x20, 0x01, 
-	0x80, 0x02, 0x00, 0x80, 0x20, 0x08, 0x02, 0x00, 0x80, 0x20, 0x08, 0x02, 0x00, 0x80, 0x20, 0x01, 
-	0x80, 0x02, 0x38, 0x91, 0x27, 0xc9, 0xe2, 0x7c, 0x91, 0x24, 0x48, 0xe2, 0x38, 0x9e, 0x20, 0x01, 
-	0x84, 0x02, 0x44, 0x91, 0x24, 0x09, 0x12, 0x54, 0x91, 0x24, 0x48, 0x42, 0x44, 0x91, 0x21, 0x81, 
-	0x82, 0x02, 0x44, 0x91, 0x24, 0x09, 0x12, 0x10, 0x8a, 0x24, 0x48, 0x42, 0x44, 0x91, 0x23, 0x01, 
-	0x81, 0x02, 0x44, 0x95, 0x27, 0x89, 0xe2, 0x10, 0x84, 0x24, 0x48, 0x42, 0x44, 0x9e, 0x27, 0xf9, 
-	0x82, 0x02, 0x54, 0x95, 0x24, 0x09, 0x42, 0x10, 0x84, 0x24, 0x48, 0x42, 0x44, 0x90, 0x23, 0x01, 
-	0x84, 0xe2, 0x48, 0x95, 0x24, 0x09, 0x22, 0x10, 0x84, 0x24, 0x48, 0x42, 0x44, 0x90, 0x21, 0x81, 
-	0x80, 0x02, 0x34, 0x8a, 0x27, 0xc9, 0x12, 0x10, 0x84, 0x23, 0x88, 0xe2, 0x38, 0x90, 0x20, 0x01, 
-	0x80, 0x02, 0x00, 0x80, 0x20, 0x08, 0x02, 0x00, 0x80, 0x20, 0x08, 0x02, 0x00, 0x80, 0x20, 0x01, 
-	0x80, 0x02, 0x00, 0x80, 0x20, 0x08, 0x02, 0x00, 0x80, 0x20, 0x08, 0x02, 0x00, 0x80, 0x20, 0x01, 
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
-	0x80, 0x00, 0x20, 0x08, 0x02, 0x00, 0x80, 0x20, 0x08, 0x02, 0x00, 0x80, 0x20, 0x08, 0x00, 0x01, 
-	0x80, 0x00, 0x20, 0x08, 0x02, 0x00, 0x80, 0x20, 0x08, 0x02, 0x00, 0x80, 0x20, 0x08, 0x00, 0x01, 
-	0x80, 0x40, 0x21, 0x08, 0xe2, 0x78, 0x9f, 0x23, 0xc9, 0x12, 0x1c, 0x91, 0x24, 0x08, 0x00, 0x01, 
-	0x80, 0xe0, 0x22, 0x89, 0x12, 0x44, 0x90, 0x24, 0x49, 0x12, 0x08, 0x92, 0x24, 0x08, 0x30, 0x11, 
-	0x81, 0xf0, 0x24, 0x49, 0x02, 0x44, 0x90, 0x24, 0x09, 0x12, 0x08, 0x94, 0x24, 0x08, 0x60, 0x11, 
-	0x81, 0x50, 0x24, 0x48, 0xe2, 0x44, 0x9e, 0x24, 0x09, 0xf2, 0x08, 0x98, 0x24, 0x08, 0xff, 0xe1, 
-	0x80, 0x40, 0x27, 0xc8, 0x12, 0x44, 0x90, 0x24, 0xc9, 0x12, 0x08, 0x94, 0x24, 0x08, 0x60, 0x01, 
-	0x80, 0x40, 0x24, 0x49, 0x12, 0x44, 0x90, 0x24, 0x49, 0x12, 0x48, 0x92, 0x24, 0x08, 0x30, 0x01, 
-	0x80, 0x40, 0x24, 0x48, 0xe2, 0x78, 0x90, 0x23, 0xc9, 0x12, 0x30, 0x91, 0x27, 0xc8, 0x00, 0x01, 
-	0x80, 0x00, 0x20, 0x08, 0x02, 0x00, 0x80, 0x20, 0x08, 0x02, 0x00, 0x80, 0x20, 0x08, 0x00, 0x01, 
-	0x80, 0x00, 0x20, 0x08, 0x02, 0x00, 0x80, 0x20, 0x08, 0x02, 0x00, 0x80, 0x20, 0x08, 0x00, 0x01, 
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
-	0x80, 0x00, 0x02, 0x00, 0x80, 0x20, 0x08, 0x02, 0x00, 0x80, 0x20, 0x08, 0x04, 0x02, 0x00, 0x01, 
-	0x80, 0x00, 0x02, 0x00, 0x80, 0x20, 0x08, 0x02, 0x00, 0x80, 0x20, 0x08, 0x04, 0x02, 0x00, 0x01, 
-	0x88, 0x73, 0xe2, 0x7c, 0x91, 0x23, 0x89, 0x12, 0x78, 0x91, 0x24, 0x48, 0x04, 0x02, 0x11, 0x01, 
-	0x98, 0x88, 0x22, 0x04, 0x91, 0x24, 0x49, 0x12, 0x44, 0x91, 0x26, 0xc8, 0x04, 0x02, 0x08, 0x81, 
-	0x88, 0x08, 0x42, 0x08, 0x8a, 0x24, 0x09, 0x12, 0x44, 0x99, 0x25, 0x48, 0x04, 0x02, 0x04, 0x41, 
-	0x88, 0x70, 0xc2, 0x38, 0x84, 0x24, 0x09, 0x12, 0x78, 0x95, 0x25, 0x48, 0x04, 0x02, 0x02, 0x21, 
-	0x88, 0x80, 0x22, 0x20, 0x8a, 0x24, 0x09, 0x12, 0x44, 0x93, 0x25, 0x48, 0xc4, 0x62, 0x04, 0x41, 
-	0x88, 0x82, 0x22, 0x40, 0x91, 0x24, 0x48, 0xa2, 0x44, 0x91, 0x24, 0x48, 0xc4, 0x62, 0x08, 0x81, 
-	0x9c, 0xf9, 0xca, 0x7c, 0x91, 0x23, 0x88, 0x42, 0x78, 0x91, 0x24, 0x48, 0x84, 0x02, 0x11, 0x01, 
-	0x80, 0x00, 0x02, 0x00, 0x80, 0x20, 0x08, 0x02, 0x00, 0x80, 0x20, 0x09, 0x04, 0x02, 0x00, 0x01, 
-	0x80, 0x00, 0x02, 0x00, 0x80, 0x20, 0x08, 0x02, 0x00, 0x80, 0x20, 0x08, 0x04, 0x02, 0x00, 0x01, 
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
-  const unsigned char commandLogo [] PROGMEM = {
-	// 'image_2025-08-27_141226131, 6x5px
-	0x80, 0x40, 0x20, 0x40, 0x9c};
-  const unsigned char backspaceLogo [] PROGMEM = {
-	// 'image_2025-08-27_145534956, 8x5px
-	0x30, 0x60, 0xff, 0x60, 0x30};
-  const unsigned char shiftLogo [] PROGMEM = {
-	// 'image_2025-08-27_150926384, 5x7px
-	0x20, 0x70, 0xf8, 0xa8, 0x20, 0x20, 0x20};
-  const unsigned char enterLogo [] PROGMEM = {
-	// 'image_2025-08-27_152515841, 12x5px
-	0x30, 0x10, 0x60, 0x10, 0xff, 0xe0, 0x60, 0x00, 0x30, 0x00};
-  const unsigned char numbersLogo [] PROGMEM = {
-	// 'image_2025-08-27_152954119, 18x7px
-	0x43, 0x9f, 0x00, 0xc4, 0x41, 0x00, 0x40, 0x42, 0x00, 0x43, 0x86, 0x00, 0x44, 0x01, 0x00, 0x44, 
-	0x11, 0x00, 0xe7, 0xce, 0x40};
-  const unsigned char spaceLogo [] PROGMEM = {
-	// 'image_2025-08-28_124343696, 8x2px
-	0x81, 0xff};
-  const unsigned char exitLogo [] PROGMEM = {
-	// 'image_2025-09-27_150408905, 8x7px
-	0x88, 0x44, 0x22, 0x11, 0x22, 0x44, 0x88
-};
 
 
 /*class led {
@@ -223,12 +79,11 @@ void buttons() {
   else {EncoderSW=false;}};
 void battery_scroll() {
   static unsigned long lastUpdate = 0;
-  const unsigned long updateInterval = 500;
 
   static int batteryLevel = 0;
   const unsigned char* batteryIcons[] = { battery0, battery1, battery2, battery3, battery4 };
 
-  if (millis() - lastUpdate >= updateInterval) {
+  if (millis() - lastUpdate >= 500) {
     display.fillRect(112, 0, 16, 8, BLACK);
     display.drawBitmap(112, 0, batteryIcons[batteryLevel], 16, 8, WHITE);
     display.display();
@@ -291,16 +146,16 @@ void debounce(bool * whichButton) {
 };
 void updateMenu(int selectedIndex) {
   display.fillRect(0, 16, 128, 48, SSD1306_BLACK);                   // Clear menu section
-  display.drawBitmap(5, 31, selectBox, 111, 16, SSD1306_WHITE);
+  display.drawBitmap(7, 31, selectBox, 111, 16, SSD1306_WHITE);
   
   display.setTextSize(1);
   display.setTextColor(SSD1306_WHITE);
   // Display previous and next options (with wrap-around)
-  display.setCursor(20, 35);
+  display.setCursor(23, 35);
   display.println(Options[selectedIndex]);
-  display.setCursor(20, 17);
+  display.setCursor(23, 17);
   display.println(Options[(selectedIndex + (NUMBER_of_OPTIONS-1) ) % NUMBER_of_OPTIONS]); // Previous
-  display.setCursor(20, 53);
+  display.setCursor(23, 53);
   display.println(Options[(selectedIndex + 1) % NUMBER_of_OPTIONS]); // Next
   display.display();
 };
@@ -315,11 +170,11 @@ void time(const char* time) {
   }
 };
 bool lockScreen=true;
-int selectedDigit=0;
-int pasNum1=2;
-int pasNum2=9;
-int pasNum3=7;
+
+uint8_t passkey[3] = {2,9,7};
 void password() {
+  setZero();
+  uint8_t selectedDigit=0;
   display.clearDisplay();
   display.setTextSize(2);
   display.setTextColor(SSD1306_WHITE);
@@ -330,11 +185,10 @@ void password() {
   display.setCursor(78, 22);
   display.println(0);
   display.display();
-  int firstNum=0;
-  int secondNum=0;
-  int thirdNum=0;
-  selectedDigit=0;
-  while (lockScreen) {
+  uint8_t num1=0;
+  uint8_t num2=0;
+  uint8_t num3=0;
+  while (true) {
     
     buttons();
     newPosition = (encoder.read() / 2) - encoderOffset;
@@ -345,20 +199,17 @@ void password() {
       debounce(&EncoderSW);
     }
     if (SideSW) {
-      selectedDigit = (selectedDigit+1) % 3;
+      selectedDigit = (selectedDigit+2) % 3; //+2 to go to previous digit
       debounce(&SideSW);
     }
-    /*if (SideSW) {
-      Lock_Screen();
-      break;
-    }*/
+
     if (selectedDigit==0) {
       display.fillRect(38, 0, 10, 64, SSD1306_BLACK);
       display.setTextSize(2);
       display.setTextColor(SSD1306_WHITE);
       display.setCursor(38, 22);
       display.println(numb);
-      firstNum=numb;
+      num1=numb;
       display.display();
     }
     if (selectedDigit==1) {
@@ -367,7 +218,7 @@ void password() {
       display.setTextColor(SSD1306_WHITE);
       display.setCursor(58, 22);
       display.println(numb);
-      secondNum=numb;
+      num2=numb;
       display.display();
     }
     if (selectedDigit==2) {
@@ -376,18 +227,18 @@ void password() {
       display.setTextColor(SSD1306_WHITE);
       display.setCursor(78, 22);
       display.println(numb);
-      thirdNum=numb;
+      num3=numb;
       display.display();
     }
     buttons();
-    if (firstNum==pasNum1 && secondNum==pasNum2 && thirdNum==pasNum3 && (EncoderSW || SideSW)){
+    if ((num1==passkey[0]) && (num2==passkey[1]) && (num3==passkey[2]) && (EncoderSW || SideSW)){
     lockScreen=false;
     setZero();
     isHome=true;
-    updateMenu(newPosition % NUMBER_of_OPTIONS);
+    updateMenu(0 % NUMBER_of_OPTIONS);
     break;
     }
-  }   //lockScreen loop end
+  }   //lockScr loop end
   if (SideSW) {
   debounce(&SideSW);
   } else if (EncoderSW) {
@@ -424,11 +275,13 @@ void Task() {
   else if (taskNum==6 && EncoderSW==true && isHome) {
     isHome=false;
     External();
-    updateMenu(6);}
+    updateMenu(6);
+    encoderOffset=0;}
   else if (taskNum==7 && EncoderSW==true && isHome) {
     isHome=false;
     Settings();
-    updateMenu(7);}
+    updateMenu(7);
+    encoderOffset=1;}
 };
 void Radio() {
   display.clearDisplay();
@@ -449,7 +302,7 @@ void Radio() {
     }
   }//while
 };
-bool lockScreenOnStart=false;     //lkScr_Start
+//bool lockScreenOnStart=false;     //lkScr_Start   at top of sketch
 bool SettingsOptionsValue[4] {false, false, false, false};
 void Settings() {
   isHome=false;
@@ -477,9 +330,11 @@ void Settings() {
     display.println(F("Pixel Counter"));
 
     display.drawBitmap(119, 19, pointArrow, 8, 5, SSD1306_WHITE);
-    display.drawBitmap(120, 30, radio_unselected, 7, 7, SSD1306_WHITE);
     display.drawBitmap(119, 43, pointArrow, 8, 5, SSD1306_WHITE);
     display.drawBitmap(119, 55, pointArrow, 8, 5, SSD1306_WHITE);
+
+    if (lockScreenOnStart==false) {display.drawBitmap(120, 30, radio_unselected, 7, 7, SSD1306_WHITE);}
+    else {display.drawBitmap(120, 30, radio_selected, 7, 7, SSD1306_WHITE);}
 
     rotary_encoder();
     
@@ -514,6 +369,7 @@ void Settings() {
       setZero();
       debounce(&SideSW);
       display.clearDisplay();
+      saveSettings();
       return;
     }
 
@@ -521,8 +377,12 @@ void Settings() {
       brightnessControll();
     }
     if (SettingsOptionsValue[1]==true) {
+      lockScreenOnStart=!lockScreenOnStart;
+      debounce(&EncoderSW);
+      SettingsOptionsValue[1]=false;
     }
     if (SettingsOptionsValue[2]==true) {
+      changePassword();
     }
     if (SettingsOptionsValue[3]==true) {
       counter();
@@ -530,6 +390,7 @@ void Settings() {
 
     display.display();
   } //while 1
+  saveSettings();
 };
 void brightnessControll() {
   setZero();
@@ -980,16 +841,22 @@ void Empty() {
     }
   }//while
 };
-int keyboardMode=0;  //0=upper, 1=lower, 2=number, 3=symbol
+int keyboardMode=0;  //0=upper, 1=number, 2=symbol
 int keyPos=0;
-int decouplePos=0;
+int lastKeyPos=0;
 bool backspaceSwap=false;
 const char keyMap[] = {
   0,'Q','W','E','R','T','Y','U','I','O','P',0,
   0,'A','S','D','F','G','H','J','K','L',  0,
   0,'Z','X','C','V','B','N','M',',','.',0
 };
+const char numMap[] = {
+  0,'1','2','3','4','5','6','7','8','9','0',0,
+  0,'-','/','\\',':',';','(',')','&','@',  0,
+  0,'`','-1','|','|','#','?','!','"','\'', 0
+};
 String keyboardText="";
+String input="";  //PC input over serial
 String keyboard(String text) {
   char c;
   int shift=1;
@@ -1001,90 +868,81 @@ String keyboard(String text) {
   while (true) {
     rotary_encoder();  // updates newPosition
     keyPos=newPosition;
+  /*
+    if (newPosition > lastKeyPos) {
+      keyPos++;
+    }
+    else if (newPosition < lastKeyPos) {
+      keyPos--;
+    }
+
+    if (keyPos<0) {keyPos=0;}
+    else if (keyPos>33) {keyPos=33;}
+
+    lastKeyPos=newPosition;
+  //*/
 
     if (keyboardMode==0) {
       display.setTextSize(1);
       display.setTextColor(SSD1306_BLACK);
+      display.fillRect(0, 27, 128, 37, SSD1306_BLACK);
+      display.drawBitmap(0, 27, keyboardUppercase, 128, 37, SSD1306_WHITE);
       switch (keyPos) {//                             The UI
         case 0:
-          display.fillRect(0, 27, 128, 37, SSD1306_BLACK);
-          display.drawBitmap(0, 27, keyboardUppercase, 128, 37, SSD1306_WHITE);
           display.fillRect(1, 28, 13, 11, SSD1306_WHITE);
           display.drawBitmap(5, 31, commandLogo, 6, 5, SSD1306_BLACK);
           break;
         case 1:
-          display.fillRect(0, 27, 128, 37, SSD1306_BLACK);
-          display.drawBitmap(0, 27, keyboardUppercase, 128, 37, SSD1306_WHITE);
           display.fillRect(15, 28, 9, 11, SSD1306_WHITE);
           display.setCursor(17, 30);
           display.println('Q');
           break;
         case 2:
-          display.fillRect(0, 27, 128, 37, SSD1306_BLACK);
-          display.drawBitmap(0, 27, keyboardUppercase, 128, 37, SSD1306_WHITE);
           display.fillRect(25, 28, 9, 11, SSD1306_WHITE);
           display.setCursor(27, 30);
           display.println('W');
           break;
         case 3:
-          display.fillRect(0, 27, 128, 37, SSD1306_BLACK);
-          display.drawBitmap(0, 27, keyboardUppercase, 128, 37, SSD1306_WHITE);
           display.fillRect(35, 28, 9, 11, SSD1306_WHITE);
           display.setCursor(37, 30);
           display.println('E');
           break;
         case 4:
-          display.fillRect(0, 27, 128, 37, SSD1306_BLACK);
-          display.drawBitmap(0, 27, keyboardUppercase, 128, 37, SSD1306_WHITE);
           display.fillRect(45, 28, 9, 11, SSD1306_WHITE);
           display.setCursor(47, 30);
           display.println('R');
           break;
         case 5:
-          display.fillRect(0, 27, 128, 37, SSD1306_BLACK);
-          display.drawBitmap(0, 27, keyboardUppercase, 128, 37, SSD1306_WHITE);
           display.fillRect(55, 28, 9, 11, SSD1306_WHITE);
           display.setCursor(57, 30);
           display.println('T');
           break;
         case 6:
-          display.fillRect(0, 27, 128, 37, SSD1306_BLACK);
-          display.drawBitmap(0, 27, keyboardUppercase, 128, 37, SSD1306_WHITE);
           display.fillRect(65, 28, 9, 11, SSD1306_WHITE);
           display.setCursor(67, 30);
           display.println('Y');
           break;
         case 7:
-          display.fillRect(0, 27, 128, 37, SSD1306_BLACK);
-          display.drawBitmap(0, 27, keyboardUppercase, 128, 37, SSD1306_WHITE);
           display.fillRect(75, 28, 9, 11, SSD1306_WHITE);
           display.setCursor(77, 30);
           display.println('U');
           break;
         case 8:
-          display.fillRect(0, 27, 128, 37, SSD1306_BLACK);
-          display.drawBitmap(0, 27, keyboardUppercase, 128, 37, SSD1306_WHITE);
           display.fillRect(85, 28, 9, 11, SSD1306_WHITE);
           display.setCursor(87, 30);
           display.println('I');
           break;
         case 9:
-          display.fillRect(0, 27, 128, 37, SSD1306_BLACK);
-          display.drawBitmap(0, 27, keyboardUppercase, 128, 37, SSD1306_WHITE);
           display.fillRect(95, 28, 9, 11, SSD1306_WHITE);
           display.setCursor(97, 30);
           display.println('O');
           break;
         case 10:
-          display.fillRect(0, 27, 128, 37, SSD1306_BLACK);
-          display.drawBitmap(0, 27, keyboardUppercase, 128, 37, SSD1306_WHITE);
           display.fillRect(105, 28, 9, 11, SSD1306_WHITE);
           display.setCursor(107, 30);
           display.println('P');
           break;
         case 11:
-          display.fillRect(0, 27, 128, 37, SSD1306_BLACK);
-          display.drawBitmap(0, 27, keyboardUppercase, 128, 37, SSD1306_WHITE);
           if (backspaceSwap==false) {
             display.fillRect(115, 28, 12, 11, SSD1306_WHITE);
             display.drawBitmap(117, 31, backspaceLogo, 8, 5, SSD1306_BLACK);
@@ -1095,8 +953,6 @@ String keyboard(String text) {
           }
           break;
         case 12:
-          display.fillRect(0, 27, 128, 37, SSD1306_BLACK);
-          display.drawBitmap(0, 27, keyboardUppercase, 128, 37, SSD1306_WHITE);
           display.fillRect(1, 40, 17, 11, SSD1306_WHITE);
           display.drawBitmap(7, 42, shiftLogo, 5, 7, SSD1306_BLACK);
           
@@ -1110,146 +966,104 @@ String keyboard(String text) {
 
           break;
         case 13:
-          display.fillRect(0, 27, 128, 37, SSD1306_BLACK);
-          display.drawBitmap(0, 27, keyboardUppercase, 128, 37, SSD1306_WHITE);
           display.fillRect(19, 40, 9, 11, SSD1306_WHITE);
           display.setCursor(21, 42);
           display.println('A');
           break;
         case 14:
-          display.fillRect(0, 27, 128, 37, SSD1306_BLACK);
-          display.drawBitmap(0, 27, keyboardUppercase, 128, 37, SSD1306_WHITE);
           display.fillRect(29, 40, 9, 11, SSD1306_WHITE);
           display.setCursor(31, 42);
           display.println('S');
           break;
         case 15:
-          display.fillRect(0, 27, 128, 37, SSD1306_BLACK);
-          display.drawBitmap(0, 27, keyboardUppercase, 128, 37, SSD1306_WHITE);
           display.fillRect(39, 40, 9, 11, SSD1306_WHITE);
           display.setCursor(41, 42);
           display.println('D');
           break;
         case 16:
-          display.fillRect(0, 27, 128, 37, SSD1306_BLACK);
-          display.drawBitmap(0, 27, keyboardUppercase, 128, 37, SSD1306_WHITE);
           display.fillRect(49, 40, 9, 11, SSD1306_WHITE);
           display.setCursor(51, 42);
           display.println('F');
           break;
         case 17:
-          display.fillRect(0, 27, 128, 37, SSD1306_BLACK);
-          display.drawBitmap(0, 27, keyboardUppercase, 128, 37, SSD1306_WHITE);
           display.fillRect(59, 40, 9, 11, SSD1306_WHITE);
           display.setCursor(61, 42);
           display.println('G');
           break;
         case 18:
-          display.fillRect(0, 27, 128, 37, SSD1306_BLACK);
-          display.drawBitmap(0, 27, keyboardUppercase, 128, 37, SSD1306_WHITE);
           display.fillRect(69, 40, 9, 11, SSD1306_WHITE);
           display.setCursor(71, 42);
           display.println('H');
           break;
         case 19:
-          display.fillRect(0, 27, 128, 37, SSD1306_BLACK);
-          display.drawBitmap(0, 27, keyboardUppercase, 128, 37, SSD1306_WHITE);
           display.fillRect(79, 40, 9, 11, SSD1306_WHITE);
           display.setCursor(81, 42);
           display.println('J');
           break;
         case 20:
-          display.fillRect(0, 27, 128, 37, SSD1306_BLACK);
-          display.drawBitmap(0, 27, keyboardUppercase, 128, 37, SSD1306_WHITE);
           display.fillRect(89, 40, 9, 11, SSD1306_WHITE);
           display.setCursor(91, 42);
           display.println('K');
           break;
         case 21:
-          display.fillRect(0, 27, 128, 37, SSD1306_BLACK);
-          display.drawBitmap(0, 27, keyboardUppercase, 128, 37, SSD1306_WHITE);
           display.fillRect(99, 40, 9, 11, SSD1306_WHITE);
           display.setCursor(101, 42);
           display.println('L');
           break;
         case 22:
-          display.fillRect(0, 27, 128, 37, SSD1306_BLACK);
-          display.drawBitmap(0, 27, keyboardUppercase, 128, 37, SSD1306_WHITE);
           display.fillRect(109, 40, 18, 11, SSD1306_WHITE);
           display.drawBitmap(112, 43, enterLogo, 12, 5, SSD1306_BLACK);
           break;
         case 23:
-          display.fillRect(0, 27, 128, 37, SSD1306_BLACK);
-          display.drawBitmap(0, 27, keyboardUppercase, 128, 37, SSD1306_WHITE);
           display.fillRect(1, 52, 21, 11, SSD1306_WHITE);
           display.drawBitmap(3, 54, numbersLogo, 18, 7, SSD1306_BLACK);
           break;
         case 24:
-          display.fillRect(0, 27, 128, 37, SSD1306_BLACK);
-          display.drawBitmap(0, 27, keyboardUppercase, 128, 37, SSD1306_WHITE);
           display.fillRect(23, 52, 9, 11, SSD1306_WHITE);
           display.setCursor(25, 54);
           display.println('Z');
           break;
         case 25:
-          display.fillRect(0, 27, 128, 37, SSD1306_BLACK);
-          display.drawBitmap(0, 27, keyboardUppercase, 128, 37, SSD1306_WHITE);
           display.fillRect(33, 52, 9, 11, SSD1306_WHITE);
           display.setCursor(35, 54);
           display.println('X');
           break;
         case 26:
-          display.fillRect(0, 27, 128, 37, SSD1306_BLACK);
-          display.drawBitmap(0, 27, keyboardUppercase, 128, 37, SSD1306_WHITE);
           display.fillRect(43, 52, 9, 11, SSD1306_WHITE);
           display.setCursor(45, 54);
           display.println('C');
           break;
         case 27:
-          display.fillRect(0, 27, 128, 37, SSD1306_BLACK);
-          display.drawBitmap(0, 27, keyboardUppercase, 128, 37, SSD1306_WHITE);
           display.fillRect(53, 52, 9, 11, SSD1306_WHITE);
           display.setCursor(55, 54);
           display.println('V');
           break;
         case 28:
-          display.fillRect(0, 27, 128, 37, SSD1306_BLACK);
-          display.drawBitmap(0, 27, keyboardUppercase, 128, 37, SSD1306_WHITE);
           display.fillRect(63, 52, 9, 11, SSD1306_WHITE);
           display.setCursor(65, 54);
           display.println('B');
           break;
         case 29:
-          display.fillRect(0, 27, 128, 37, SSD1306_BLACK);
-          display.drawBitmap(0, 27, keyboardUppercase, 128, 37, SSD1306_WHITE);
           display.fillRect(73, 52, 9, 11, SSD1306_WHITE);
           display.setCursor(75, 54);
           display.println('N');
           break;
         case 30:
-          display.fillRect(0, 27, 128, 37, SSD1306_BLACK);
-          display.drawBitmap(0, 27, keyboardUppercase, 128, 37, SSD1306_WHITE);
           display.fillRect(83, 52, 9, 11, SSD1306_WHITE);
           display.setCursor(85, 54);
           display.println('M');
           break;
         case 31:
-          display.fillRect(0, 27, 128, 37, SSD1306_BLACK);
-          display.drawBitmap(0, 27, keyboardUppercase, 128, 37, SSD1306_WHITE);
           display.fillRect(93, 52, 8, 11, SSD1306_WHITE);
           display.setCursor(94, 54);
           display.println(',');
           break;
         case 32:
-          display.fillRect(0, 27, 128, 37, SSD1306_BLACK);
-          display.drawBitmap(0, 27, keyboardUppercase, 128, 37, SSD1306_WHITE);
           display.fillRect(102, 52, 8, 11, SSD1306_WHITE);
           display.setCursor(103, 53);
           display.println('.');
           break;
         case 33:
-          display.fillRect(0, 27, 128, 37, SSD1306_BLACK);
-          display.drawBitmap(0, 27, keyboardUppercase, 128, 37, SSD1306_WHITE);
           display.fillRect(111, 52, 16, 11, SSD1306_WHITE);
           display.drawBitmap(115, 54, exitLogo, 8, 7, SSD1306_BLACK);
           break;
@@ -1282,10 +1096,11 @@ String keyboard(String text) {
         firstLetterPressed=true;
         if (shift==0) {     // this is correct bc at shift==0 i want to lowercase the letters
           text += (char)tolower(c);} 
-        else {    //could be optimized to just else {}
+        else {
           text += c;}
+        }
+        if ((firstLetterPressed==true) && (shift==1)) {shift=0;
       }
-      if ((firstLetterPressed==true) && (shift==1)) {shift=0;}
 
       switch (keyPos) {//                         The Function
         case 0:
@@ -1318,7 +1133,7 @@ String keyboard(String text) {
           break;
 
         case 33:
-          return;
+          return text;
 
         default:
           if (keyPos>33) {return text;}
@@ -1344,18 +1159,164 @@ String keyboard(String text) {
 
   }//while
 };
-void SerialCom() {
-  keyboard:
+uint8_t passArr[3] = {0,0,0};
+uint8_t passArrIndex = 0;
+void changePassword() {
   debounce(&EncoderSW);
-  keyboardText=keyboard(keyboardText);
+  setZero();
+  display.clearDisplay();
+  passkey[0] = passkey[1] = passkey[2] = 0;
+
+  while (true) {
+    rotary_encoder();
+    keyPos=newPosition +1;
+    display.setTextSize(1);
+    display.setTextColor(SSD1306_BLACK);
+    display.clearDisplay();
+    display.drawBitmap(45, 21, keypadNumbers, 38, 42, SSD1306_WHITE);
+    switch (keyPos) {
+      case 1:
+        display.fillRect(46, 22, 11, 9, SSD1306_WHITE);
+        display.setCursor(49, 23);
+        display.println(1);
+        break;
+      case 2:
+        display.fillRect(58, 22, 11, 9, SSD1306_WHITE);
+        display.setCursor(61, 23);
+        display.println(2);
+        break;
+      case 3:
+        display.fillRect(70, 22, 11, 9, SSD1306_WHITE);
+        display.setCursor(73, 23);
+        display.println(3);
+        break;
+      case 4:
+        display.fillRect(46, 32, 11, 9, SSD1306_WHITE);
+        display.setCursor(49, 33);
+        display.println(4);
+        break;
+      case 5:
+        display.fillRect(58, 32, 11, 9, SSD1306_WHITE);
+        display.setCursor(61, 33);
+        display.println(5);
+        break;
+      case 6:
+        display.fillRect(70, 32, 11, 9, SSD1306_WHITE);
+        display.setCursor(73, 33);
+        display.println(6);
+        break;
+      case 7:
+        display.fillRect(46, 42, 11, 9, SSD1306_WHITE);
+        display.setCursor(49, 43);
+        display.println(7);
+        break;
+      case 8:
+        display.fillRect(58, 42, 11, 9, SSD1306_WHITE);
+        display.setCursor(61, 43);
+        display.println(8);
+        break;
+      case 9:
+        display.fillRect(70, 42, 11, 9, SSD1306_WHITE);
+        display.setCursor(73, 43);
+        display.println(9);
+        break;
+      case 10:
+        display.fillRect(46, 52, 11, 9, SSD1306_WHITE);
+        display.setCursor(49, 52);
+        display.println(F("x"));
+        break;
+      case 11:
+        display.fillRect(58, 52, 11, 9, SSD1306_WHITE);
+        display.setCursor(61, 53);
+        display.println(0);
+        break;
+      case 12:
+        display.fillRect(70, 52, 11, 9, SSD1306_WHITE);
+        display.drawBitmap(73, 54, smallDoubleArrow, 6, 5, SSD1306_BLACK);
+        break;
+    }
+    display.setTextColor(SSD1306_WHITE);
+    display.setTextSize(2);
+    display.setTextSize(2);
+    display.setCursor(45, 0);
+    display.println(passArr[0]);
+    display.setCursor(59, 0);
+    display.println(passArr[1]);
+    display.setCursor(73, 0);
+    display.println(passArr[2]);
+    display.display();
+
+    if (EncoderSW) {
+      debounce(&EncoderSW);
+      if ((keyPos > 0) && (keyPos < 10)) {
+        passArr[passArrIndex] = keyPos;
+        passArrIndex++;
+      }
+      else if (keyPos == 11) {
+        passArr[passArrIndex] = 0;
+        passArrIndex++;
+      }
+      else if (keyPos == 10) {
+        passArrIndex = 0;
+        passArr[0] = 0;
+        passArr[1] = 0;
+        passArr[2] = 0;
+        display.fillRect(0, 0, 120, 16, SSD1306_BLACK);
+        display.display();
+      }
+      else if (keyPos == 12) {
+        debounce(&EncoderSW);
+        passkey[0] = passArr[0];
+        passkey[1] = passArr[1];
+        passkey[2] = passArr[2];
+        passArrIndex = 0;
+        SettingsOptionsValue[2]=false;
+        return;
+      }
+    }
+    
+    buttons();
+    if (SideSW) {
+      debounce(&SideSW); 
+      SettingsOptionsValue[2]=false;
+      passArrIndex = 0;
+      return;}
+  }
+};
+void SerialCom() {
+  debounce(&EncoderSW);
+  keyboardText="SerialCom";
   display.clearDisplay();
   display.setTextSize(1);
   display.setTextColor(SSD1306_WHITE);
   display.setCursor(0, 0);
   display.println(keyboardText);
   display.display();
+  keyboardText="";
+  goto skip;
 
+  start:
+  debounce(&EncoderSW);
+  keyboardText=keyboard(keyboardText);
+  Serial.println(keyboardText);
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(0, 0);
+  display.println(keyboardText);
+  display.display();
+  keyboardText="";
+
+  skip:
   while (true) {
+    if (Serial.available()) {
+      input = Serial.readStringUntil('\n');  // reads until newline
+      display.clearDisplay();
+      display.setCursor(0, 16);
+      display.print(input);
+      display.display();
+    }
+    
     buttons();
     if (SideSW) {
       display.clearDisplay();
@@ -1363,11 +1324,11 @@ void SerialCom() {
       return;
     }
     if (EncoderSW) {
-      goto keyboard;
+      goto start;
     }
   }
 };
-void testdrawchar(void) {
+/*void testdrawchar(void) {
   display.clearDisplay();
 
   display.setTextSize(1);      // Normal 1:1 pixel scale
@@ -1391,33 +1352,78 @@ void testdrawchar(void) {
       return;
     }
   }
-};
-void External() {
+};*/
+bool barActive=false;
+unsigned long lastMove;
+void External() { 
   display.clearDisplay();
-  display.setTextSize(4);
-  display.setCursor(0, 16);
-  display.cp437(true);
-  //display.print(F(""));//
-  display.write(210);
-  display.write(211);
-  display.write(212);
-  display.write(213);
-  //display.write(7);
-  //display.write(8);
+  display.drawRoundRect(14, 62, 100, 30, 7, SSD1306_WHITE);
   display.display();
-
+  int barPos=newPosition;
   while (true) {
-    buttons();
+    rotary_encoder();
+    display.clearDisplay();
+
+    if (barPos != newPosition) {
+      //debounce(&EncoderSW);
+      barUp();
+      lastMove=millis();
+      barPos=newPosition;
+      display.drawBitmap(19, 55, iconsBar, 90, 9, SSD1306_WHITE);
+      display.display();
+    }
+
+    if (( (millis()-lastMove) >1000) && barActive) {
+      lastMove=millis();
+      barDown();
+    }
+
     if (SideSW) {
       isHome=true;
       return;
     }
-  }//*/
+  }//while
 };
+void barUp() {
+  if (barActive==false) {
+    for (int i=61; i>52; i-=2) { //bar go up animation 
+      display.clearDisplay();
+      display.drawRoundRect(14, i, 100, 30, 7, SSD1306_WHITE);
+      display.display();
+    }
+    display.clearDisplay();
+    display.drawRoundRect(14, 52, 100, 30, 7, SSD1306_WHITE);
+    display.display();
+    barActive=true;
+  }
+};
+void barDown() {
+  if (barActive) {
+    for (int i=52; i<62; i+=2) { //bar go down animation 
+      display.clearDisplay();
+      display.drawRoundRect(14, i, 100, 30, 7, SSD1306_WHITE);
+      display.display();
+    }
+    display.clearDisplay();
+    display.drawRoundRect(14, 62, 100, 30, 7, SSD1306_WHITE);
+    display.display();
+    barActive=false;
+  }
+};
+/*void measureBottom() {
+  for (int i=0; i<60; i+=2) {
+    display.drawPixel(i, 63, SSD1306_WHITE);
+  }
+  for (int i=127; i>70; i-=2) {
+    display.drawPixel(i, 63, SSD1306_WHITE);
+  }
+  display.display();
+}*/
 void Lock_Screen() { 
+  debounce(&EncoderSW);
   setZero();
   lockScreen=true;
-  
+  password();
   /*int xpos(0), ypos(0);
   display.clearDisplay();
   while (lockScreen) {
@@ -1500,10 +1506,36 @@ void Lock_Screen() {
       }
   }//while  */
 };
+uint8_t EEPROMpasskey[3];
+void saveSettings() {
+  int addr=0;
+  EEPROM.update(addr, lockScreenOnStart);  // bool: 1 byte
+  addr += sizeof(lockScreenOnStart);
+
+  for (int i = 0; i < 3; i++) {               // passkey array: 3 bytes
+    if (passkey[i] != EEPROMpasskey[i]) {
+      EEPROM.update(addr + i, passkey[i]);
+      EEPROMpasskey[i] = passkey[i];
+    }
+  }//for
+};
+void loadSettings() {
+  int addr=0;   //local to reset to 0
+  EEPROM.get(addr, lockScreenOnStart);
+  addr += sizeof(lockScreenOnStart);
+  EEPROM.get(addr, passkey);
+  addr += sizeof(passkey);                    // passkey array: 3 bytes
+
+  for (int i = 0; i < 3; i++) {
+    if (passkey[i] != EEPROMpasskey[i]) {
+      EEPROM.update(addr + i, passkey[i]);
+      EEPROMpasskey[i] = passkey[i];
+    }
+  }//for
+};
 
 
 void loop() {
-  //Lock_Screen(); in setup
   buttons();
   rotary_encoder();
   Task();
